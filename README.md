@@ -1,1 +1,1 @@
-# s2-modeling-and-simulations
+# Repo for Semester 2: Modeling and Simulation subject.
