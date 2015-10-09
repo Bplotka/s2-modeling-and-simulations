@@ -99,6 +99,8 @@ void printUsage(char **argv) {
 
 
 int main (int argc, char **argv) {
+  // Cin && cout optimization.
+  std::ios_base::sync_with_stdio(false);
   // Max acc: 2^16 = 65536
   // Max size of array: 2^24 = 16777216
   // Max elem | value |: 2^64 = 18446744073709551616
