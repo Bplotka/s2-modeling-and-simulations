@@ -1,12 +1,9 @@
-#include <cmath>
 #include <gmpxx.h>
 #include <iostream>
-#include <vector>
 #include <sstream>
 
 #define SUCCESS 0
 #define FAILURE 1
-
 
 #define MAX_ARR_SIZE 16777216
 #define MAX_PRECISION 65536
@@ -15,6 +12,9 @@
 
 using namespace std;
 
+/**
+ * Calc mean Vak
+ */
 mpf_class meanVal(const mpf_class* arr, size_t size, size_t acc) {
         
   mpf_class sum(0, acc), length(size, acc), result(0, acc);
@@ -27,14 +27,13 @@ mpf_class meanVal(const mpf_class* arr, size_t size, size_t acc) {
 }
 
 mpf_class varVal(const mpf_class* arr, const size_t& size, const size_t& acc,
-                 const mpf_class& meanValue) {
+                 const mpf_class& meanValueSquare) {
 
   mpf_class sum2(0, acc), length(size, acc), result(0, acc);
 
   mpf_class temp(0, acc);
   for (int i=0; i< length; i++) {
-    temp = arr[i] - meanValue;
-    mpf_pow_ui(temp.get_mpf_t(), temp.get_mpf_t(), 2);
+    temp = arr[i] - meanValueSquare;
     sum2 += temp;
   }
 
@@ -147,7 +146,7 @@ int main (int argc, char **argv) {
   mpf_class meanValue(0, accuracy);
   mpf_class varianceVal(0, accuracy);
   mpf_class periodicVal(0, accuracy);
-
+  mpf_class meanValueSquare(0, accuracy);
   mpf_class sum(0, accuracy);
 
   // Our array.
@@ -167,12 +166,12 @@ int main (int argc, char **argv) {
   {
     if(!(lineStream >> input_val)) break;
     sum += input_val;
-    arr[i] = input_val;
+    arr[i] = input_val*input_val;
     i++;
   }
 
   meanValue = sum / i;
-
+  meanValueSquare = meanValue * meanValue;
 #ifdef LOG_INFO
   cout << "Starting prog" << endl;
 #endif
@@ -181,7 +180,7 @@ int main (int argc, char **argv) {
   cout.precision(accuracy);
   cout << meanValue << endl;
 
-  cout << varVal(arr, i, accuracy, meanValue) << endl;
+  cout << varVal(arr, i, accuracy, meanValueSquare) << endl;
 
   //cout << varVal(arr, i, accuracy, meanValue) << endl;
 
