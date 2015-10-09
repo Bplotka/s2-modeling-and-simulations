@@ -7,35 +7,57 @@
 #define SUCCESS 0
 #define FAILURE 1
 
-#define LOG_INFO 1
+#define LOG_INFO
 
 using namespace std;
 
 mpf_class meanVal(const mpf_class* arr, long size, long acc) {
         
-  mpf_class sum(0, acc);
-  mpf_class length(size, acc);
+  mpf_class sum(0, acc), length(size, acc), result(0, acc);
   for (int i=0;i<length;i++)
   {
         sum += arr[i];
   }
-   mpf_class result(0, acc);
    result = sum/length;
    return result;
 }
 
 mpf_class varVal(const mpf_class* arr, long size, long acc) {
 
-  mpf_class sum(0, acc);
-  mpf_class length(size, acc);
-  for (int i=0;i<length;i++)
-  {
+  mpf_class sum(0, acc), sum2(0, acc), length(size, acc), result(0, acc);
+  for (int i=0; i< length; i++)
     sum += arr[i];
+
+  sum = (sum / length);
+
+  for (int i=0; i< length; i++) {
+    mpf_class temp(0, acc);
+    temp = arr[i] - sum;
+    sum2 +=  temp * temp;
   }
-  mpf_class result(0, acc);
-  result = sum/length;
+
+  result = (sum2/length);
   return result;
 }
+
+mpf_class periodVal(const mpf_class* arr, long size, long acc) {
+
+  mpf_class sum(0, acc), sum2(0, acc), length(size, acc), result(0, acc);
+  for (int i=0; i< length; i++)
+    sum += arr[i];
+
+  sum = (sum / length);
+
+  for (int i=0; i< length; i++) {
+    mpf_class temp(0, acc);
+    temp = arr[i] - sum;
+    sum2 +=  temp * temp;
+  }
+
+  result = (sum2/length);
+  return result;
+}
+
 
 
 const vector<mpf_class> getStream(long acc) {
@@ -93,15 +115,17 @@ int main (int argc, char **argv) {
   }
 
   vector<mpf_class> vec = getStream(accuracy);
-
+#ifdef LOG_INFO
+  cout << "Starting prog" << endl;
+#endif
 //debugPrintArr(&vec[0], vec.size());
 
   cout.precision(accuracy);
-  cout << meanVal(&vec[0], 3, accuracy) << "\n";
+  cout << meanVal(&vec[0], vec.size(), accuracy) << endl;
 
-  cout << varVal(&vec[0], 3, accuracy) << "\n";
+  cout << varVal(&vec[0], vec.size(), accuracy) << endl;
 
-  //cout << meanVal(&vec[0], 3, accuracy) << "\n";
+  cout << periodVal(&vec[0], vec.size(), accuracy) << endl;
 
   return 0;
 }
