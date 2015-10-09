@@ -34,7 +34,8 @@ mpf_class varVal(const mpf_class* arr, const size_t& size, const size_t& acc,
   mpf_class temp(0, acc);
   for (int i=0; i< length; i++) {
     temp = arr[i] - meanValue;
-    sum2 +=  temp * temp;
+    mpf_pow_ui(temp.get_mpf_t(), temp.get_mpf_t(), 2);
+    sum2 += temp;
   }
 
   result = (sum2/length);
@@ -182,7 +183,7 @@ int main (int argc, char **argv) {
 
   cout << varVal(arr, i, accuracy, meanValue) << endl;
 
-  cout << varVal(arr, i, accuracy, meanValue) << endl;
+  //cout << varVal(arr, i, accuracy, meanValue) << endl;
 
   delete[](arr);
   return 0;
