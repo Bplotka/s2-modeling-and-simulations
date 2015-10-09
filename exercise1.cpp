@@ -13,19 +13,8 @@
 using namespace std;
 
 /**
- * Calc mean Vak
+ * Variance calculation.
  */
-mpf_class meanVal(const mpf_class* arr, size_t size, size_t acc) {
-        
-  mpf_class sum(0, acc), length(size, acc), result(0, acc);
-  for (int i=0;i<length;i++)
-  {
-        sum += arr[i];
-  }
-   result = sum/length;
-   return result;
-}
-
 mpf_class varVal(const mpf_class* arr, const size_t& size, const size_t& acc,
                  const mpf_class& meanValueSquare) {
 
@@ -41,48 +30,18 @@ mpf_class varVal(const mpf_class* arr, const size_t& size, const size_t& acc,
   return result;
 }
 
+/**
+ * Not yet implemented.
+ */
 mpf_class periodVal(const mpf_class* arr, size_t size, size_t acc) {
-
-  mpf_class sum(0, acc), sum2(0, acc), length(size, acc), result(0, acc);
-  for (int i=0; i< length; i++)
-    sum += arr[i];
-
-  sum = (sum / length);
-
-  for (int i=0; i< length; i++) {
-    mpf_class temp(0, acc);
-    temp = arr[i] - sum;
-    sum2 +=  temp * temp;
-  }
-
-  result = (sum2/length);
+  mpf_class result(0, acc);
+  // TODO: DO task3 INLINE.
   return result;
 }
 
-
-const vector<mpf_class> getStream(size_t acc) {
-  vector<mpf_class> vec;
-
-  string line;
-#ifdef LOG_INFO
-  cout << "Enter input in one line:" << endl;
-#endif
-  std::getline(cin, line);
-  stringstream lineStream(line);
-
-  while (true)
-  {
-    mpf_class input_val;
-    if(!(lineStream >> input_val)) break;
-    input_val.set_prec(acc);
-
-    vec.push_back(input_val);
-  }
-
-  return vec;
-}
-
-
+/**
+ * Not used, since we want to use this loop to do some initial calculations.
+ */
 mpf_class* getArrStream(size_t acc, size_t& size) {
   mpf_class* arr = new mpf_class[MAX_ARR_SIZE];
   size_t i = 0;
@@ -94,12 +53,12 @@ mpf_class* getArrStream(size_t acc, size_t& size) {
   std::getline(cin, line);
   stringstream lineStream(line);
 
+  mpf_class input_val;
+  input_val.set_prec(acc);
   while (true)
   {
-    mpf_class input_val;
-    if(!(lineStream >> input_val)) break;
-    input_val.set_prec(acc);
 
+    if(!(lineStream >> input_val)) break;
     arr[i] = input_val;
     i++;
   }
@@ -109,6 +68,9 @@ mpf_class* getArrStream(size_t acc, size_t& size) {
 }
 
 
+/**
+ * Debug only.
+ */
 void debugPrintArr(const mpf_class* arr, long size) {
   cout << "Debug array print:" << endl;
   for (long i = 0; i < size; i++) {
@@ -119,11 +81,18 @@ void debugPrintArr(const mpf_class* arr, long size) {
 }
 
 
+/**
+ * Print usage.
+ */
 void printUsage(char **argv) {
   cout <<"usage: "<< argv[0] <<" <accuracy>\n";
 }
 
 
+/**
+ * Main function.
+ * Current time for test2: 11s
+ */
 int main (int argc, char **argv) {
   // Cin && cout optimization.
   std::ios_base::sync_with_stdio(false);
@@ -144,14 +113,12 @@ int main (int argc, char **argv) {
   }
 
   mpf_class meanValue(0, accuracy);
-  mpf_class varianceVal(0, accuracy);
-  mpf_class periodicVal(0, accuracy);
   mpf_class meanValueSquare(0, accuracy);
   mpf_class sum(0, accuracy);
 
-  // Our array.
+  // Main sequence.
   mpf_class* arr = new mpf_class[MAX_ARR_SIZE];
-  size_t i = 0;
+  size_t size = 0;
 
   string line;
 #ifdef LOG_INFO
@@ -166,23 +133,21 @@ int main (int argc, char **argv) {
   {
     if(!(lineStream >> input_val)) break;
     sum += input_val;
-    arr[i] = input_val*input_val;
-    i++;
+    arr[size] = input_val*input_val;
+    size++;
   }
 
-  meanValue = sum / i;
+  meanValue = sum / size;
   meanValueSquare = meanValue * meanValue;
 #ifdef LOG_INFO
-  cout << "Starting prog" << endl;
+  cout << "Starting prog <size of arr: " << size <<  ">" << endl;
 #endif
-//debugPrintArr(&vec[0], vec.size());
 
   cout.precision(accuracy);
+
   cout << meanValue << endl;
-
-  cout << varVal(arr, i, accuracy, meanValueSquare) << endl;
-
-  //cout << varVal(arr, i, accuracy, meanValue) << endl;
+  cout << varVal(arr, size, accuracy, meanValueSquare) << endl;
+  // TODO: cout << periodVal << endl;
 
   delete[](arr);
   return 0;
