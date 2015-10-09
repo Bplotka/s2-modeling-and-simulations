@@ -11,10 +11,17 @@
 
 using namespace std;
 
-
-mpz_class* meanVal(const mpz_class* arr) {
-  mpz_class ret;
-  return NULL;
+mpf_class meanVal(const mpf_class* arri, int n,int d) {
+        
+  mpf_class sum("0",d);
+  mpf_class length(n,d);
+  for (int i=0;i<length;i++)
+  {
+        sum += arri[i];
+  }
+   mpf_class result("0",64);
+   result = sum/length;
+   return result;
 }
 
 
@@ -74,5 +81,22 @@ int main (int argc, char **argv) {
 
   debugPrintArr(&vec[0], vec.size());
 
-  return SUCCESS;
+  // arg1 - accuracy (d) 1 <= d <= 2^16
+  // Ciag
+  mpf_class a("2",64), b("1",64), c("1",64);
+  //a = 2;
+  //b = "3";
+  //c = a/b;
+  mpf_class arri[3] = {a, b, c};
+//  arri[0]=a;
+//  arri[1]=b;
+//  arri[2]=c;
+// cout << "mean " << meanVal(arri,3,64)<< "\n";
+  
+ gmp_printf ("fixed point mpf %.*Ff with %d digits\n", 64, meanVal(arri,3,64), 64);
+  //cout << "absolute value is " << b.get_str() << "\n";
+  //int n =64;
+//  gmp_printf ("fixed point mpf %.*Ff with %d digits\n", n, b, n);
+
+  return 0;
 }
