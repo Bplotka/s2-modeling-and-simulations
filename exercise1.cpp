@@ -7,6 +7,10 @@
 #define SUCCESS 0
 #define FAILURE 1
 
+
+#define MAX_ARR_SIZE 16777216
+#define MAX_PRECISION 65536
+
 #define LOG_INFO
 
 using namespace std;
@@ -80,7 +84,7 @@ const vector<mpf_class> getStream(size_t acc) {
 
 
 mpf_class* getArrStream(size_t acc, size_t& size) {
-  mpf_class* arr = new mpf_class[16777216];
+  mpf_class* arr = new mpf_class[MAX_ARR_SIZE];
   size_t i = 0;
 
   string line;
@@ -126,7 +130,7 @@ int main (int argc, char **argv) {
   // Max acc: 2^16 = 65536
   // Max size of array: 2^24 = 16777216
   // Max elem | value |: 2^64 = 18446744073709551616
-  int accuracy = 65536; // Default accuracy.
+  int accuracy = MAX_PRECISION; // Default accuracy.
 
   if ( argc > 1 ) {
     if (!strcmp(argv[1], "-h")) {
@@ -135,7 +139,7 @@ int main (int argc, char **argv) {
     }
 
     accuracy = atoi(argv[1]);
-    if (accuracy > accuracy )
+    if (accuracy < 1  && accuracy > MAX_PRECISION)
       return FAILURE;
   }
 
@@ -146,7 +150,7 @@ int main (int argc, char **argv) {
   mpf_class sum(0, accuracy);
 
   // Our array.
-  mpf_class* arr = new mpf_class[16777216];
+  mpf_class* arr = new mpf_class[MAX_ARR_SIZE];
   size_t i = 0;
 
   string line;
