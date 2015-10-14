@@ -1,0 +1,10 @@
+# Ignore the build
+Build
+Build/*
+
+#Ignore large test files
+Exercise_1/Test_Data/Example_1/*
+Exercise_1/Test_Data/Example_2/*
+
+#Ignore test results
+Exercise_1/Test_Results/*
