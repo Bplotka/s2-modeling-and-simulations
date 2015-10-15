@@ -31,6 +31,13 @@ mpf_class varVal(const mpf_class* arr, const size_t& size, const size_t& acc,
   return result;
 }
 
+int getPrec(mpf_class number){
+  mp_exp_t expo;
+  string base = number.get_str(expo);
+  return expo;
+}
+
+
 
 /**
  * Not yet implemented.
@@ -143,7 +150,8 @@ int main (int argc, char **argv) {
   mpf_class meanValue(0, accuracy);
   mpf_class meanValueSquare(0, accuracy);
   mpf_class sum(0, accuracy);
-
+  mpf_class varValue(0, accuracy);
+  mpf_class periodValue(0, accuracy);
   // Main sequence.
   mpf_class* arr = new mpf_class[MAX_ARR_SIZE];
   size_t size = 0;
@@ -171,10 +179,15 @@ int main (int argc, char **argv) {
  // cout << "Starting prog <size of arr: " << size <<  ">" << endl;
 #endif
   string dupa;
-  cout.precision(printAccuracy+39);
+  cout.precision(printAccuracy+getPrec(meanValue));
   cout <<  meanValue << endl;
-  cout << varVal(arr,size,accuracy,meanValueSquare) << endl;
-  cout << periodVal(arr, size, accuracy) << endl;
+  varValue = varVal(arr,size,accuracy,meanValueSquare);
+  cout.precision(printAccuracy+getPrec(varValue));
+  cout << varValue << endl;
+  periodValue = periodVal(arr, size, accuracy);
+  cout.precision(printAccuracy+getPrec(periodValue));
+  cout << periodValue << endl;
+//  cout << getPrec(meanValue) << endl;
   delete[](arr);
   return 0;
 }
