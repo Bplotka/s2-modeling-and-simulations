@@ -7,11 +7,11 @@
 
 #define MAX_ARR_SIZE 16777216
 #define MAX_PRECISION 65536
-
-// Uncomment for debbuging
-// #define LOG_INFO
+#define PRECISSION_MUL 4
+//#define LOG_INFO
 
 using namespace std;
+
 
 /**
  * Variance calculation.
@@ -31,11 +31,9 @@ mpf_class varVal(const mpf_class* arr, const size_t& size, const size_t& acc,
   return result;
 }
 
+
 /**
- * Really simplistic take on calculating sequence period - does not take
- * into account possibility of item repetition, however this seems to be
- * not needed (aka I have reasons to belive that test sets have distinct
- * values.
+ * Not yet implemented.
  */
 mpf_class periodVal(const mpf_class* valuesArray, size_t size, size_t accuracy) {
   int current_period = 1;
@@ -45,19 +43,19 @@ mpf_class periodVal(const mpf_class* valuesArray, size_t size, size_t accuracy) 
   {
       bool is_period_valid = true;
       for (long i = 1; i < size - current_period; i++) 
-      {
+      {   
           if (valuesArray[i] != valuesArray[i+current_period]) 
-          {
+          {   
               is_period_valid = false;
               break;
-          }
-      }
+          }   
+      }   
 
       if (is_period_valid)
-      {
+      {   
           minimal_period = current_period;
           break;
-      }
+      }   
     
       current_period += 1;
   }
@@ -65,6 +63,7 @@ mpf_class periodVal(const mpf_class* valuesArray, size_t size, size_t accuracy) 
   mpf_class result(minimal_period, accuracy);
   return result;
 }
+
 
 /**
  * Not used, since we want to use this loop to do some initial calculations.
@@ -112,7 +111,7 @@ void debugPrintArr(const mpf_class* arr, long size) {
  * Print usage.
  */
 void printUsage(char **argv) {
-  cout <<"usage: "<< argv[0] <<" <accuracy>\n";
+  cout <<"usage: "<< argv[0] <<" <printAccuracy>\n";
 }
 
 
@@ -126,7 +125,7 @@ int main (int argc, char **argv) {
   // Max acc: 2^16 = 65536
   // Max size of array: 2^24 = 16777216
   // Max elem | value |: 2^64 = 18446744073709551616
-  int accuracy = MAX_PRECISION; // Default accuracy.
+  int accuracy = MAX_PRECISION; // Default printAccuracy.
 
   if ( argc > 1 ) {
     if (!strcmp(argv[1], "-h")) {
@@ -138,6 +137,8 @@ int main (int argc, char **argv) {
     if (accuracy < 1  && accuracy > MAX_PRECISION)
       return FAILURE;
   }
+  int  printAccuracy = accuracy;
+  accuracy *= PRECISSION_MUL;
 
   mpf_class meanValue(0, accuracy);
   mpf_class meanValueSquare(0, accuracy);
@@ -167,15 +168,13 @@ int main (int argc, char **argv) {
   meanValue = sum / size;
   meanValueSquare = meanValue * meanValue;
 #ifdef LOG_INFO
-  cout << "Starting prog <size of arr: " << size <<  ">" << endl;
+ // cout << "Starting prog <size of arr: " << size <<  ">" << endl;
 #endif
-
-  cout.precision(accuracy);
-
-  cout << meanValue << endl;
-  cout << varVal(arr, size, accuracy, meanValueSquare) << endl;
+  string dupa;
+  cout.precision(printAccuracy+39);
+  cout <<  meanValue << endl;
+  cout << varVal(arr,size,accuracy,meanValueSquare) << endl;
   cout << periodVal(arr, size, accuracy) << endl;
-
   delete[](arr);
   return 0;
 }
