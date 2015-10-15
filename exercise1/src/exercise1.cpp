@@ -1,7 +1,7 @@
 #include <gmpxx.h>
 #include <iostream>
 #include <sstream>
-
+#include <string>
 #define SUCCESS 0
 #define FAILURE 1
 
@@ -13,36 +13,11 @@
 using namespace std;
 
 
-/**
- * Variance calculation.
- */
-mpf_class varVal(const mpf_class* arr, const size_t& size, const size_t& acc,
-                 const mpf_class& meanValueSquare) {
-
-  mpf_class sum2(0, acc), length(size, acc), result(0, acc);
-
-  mpf_class temp(0, acc);
-  for (int i=0; i< length; i++) {
-    temp = arr[i] - meanValueSquare;
-    sum2 += temp;
-  }
-
-  result = (sum2/length);
-  return result;
-}
-
-int getPrec(mpf_class number){
-  mp_exp_t expo;
-  string base = number.get_str(expo);
-  return expo;
-}
-
-
 
 /**
- * Not yet implemented.
+ * implemented.
  */
-mpf_class periodVal(const mpf_class* valuesArray, size_t size, size_t accuracy) {
+mpf_class periodVal(const mpz_class* valuesArray, size_t size, size_t accuracy) {
   int current_period = 1;
   int minimal_period = size;
 
@@ -73,87 +48,39 @@ mpf_class periodVal(const mpf_class* valuesArray, size_t size, size_t accuracy) 
 
 
 /**
- * Not used, since we want to use this loop to do some initial calculations.
- */
-mpf_class* getArrStream(size_t acc, size_t& size) {
-  mpf_class* arr = new mpf_class[MAX_ARR_SIZE];
-  size_t i = 0;
-
-  string line;
-#ifdef LOG_INFO
-  cout << "Enter input in one line:" << endl;
-#endif
-  std::getline(cin, line);
-  stringstream lineStream(line);
-
-  mpf_class input_val;
-  input_val.set_prec(acc);
-  while (true)
-  {
-
-    if(!(lineStream >> input_val)) break;
-    arr[i] = input_val;
-    i++;
-  }
-
-  size = i;
-  return arr;
-}
-
-
-/**
- * Debug only.
- */
-void debugPrintArr(const mpf_class* arr, long size) {
-  cout << "Debug array print:" << endl;
-  for (long i = 0; i < size; i++) {
-    cout << arr[i] << " ";
-  }
-  cout << endl;
-
-}
-
-
-/**
- * Print usage.
- */
-void printUsage(char **argv) {
-  cout <<"usage: "<< argv[0] <<" <printAccuracy>\n";
-}
-
-
-/**
  * Main function.
  * Current time for test2: 11s
  */
 int main (int argc, char **argv) {
   // Cin && cout optimization.
-  std::ios_base::sync_with_stdio(false);
+  //std::ios_base::sync_with_stdio(false);
   // Max acc: 2^16 = 65536
   // Max size of array: 2^24 = 16777216
   // Max elem | value |: 2^64 = 18446744073709551616
   int accuracy = MAX_PRECISION; // Default printAccuracy.
 
-  if ( argc > 1 ) {
-    if (!strcmp(argv[1], "-h")) {
-      printUsage(argv);
-      return SUCCESS;
-    }
 
-    accuracy = atoi(argv[1]);
-    if (accuracy < 1  && accuracy > MAX_PRECISION)
-      return FAILURE;
-  }
-  int  printAccuracy = accuracy;
-  accuracy *= PRECISSION_MUL;
 
-  mpf_class meanValue(0, accuracy);
-  mpf_class meanValueSquare(0, accuracy);
-  mpf_class sum(0, accuracy);
-  mpf_class varValue(0, accuracy);
-  mpf_class periodValue(0, accuracy);
+  accuracy = atoi(argv[1]);
+  if (accuracy < 1  && accuracy > MAX_PRECISION)
+    return FAILURE;
+
+  string decimalMeanValue;
+  string decimalVarValue;
+
+  mpz_class meanValue(0);
+  //mpz_class meanValueSquare(0);
+  mpz_class sum(0);
+  mpz_class varSum(0);
+  mpz_class vasSumTemp(0);
+  mpz_class varValue(0);
+  mpz_class periodValue(0);
+  mpz_class remainderMeanValue(0);
+  mpz_class remainderVarValue(0);
+  mpz_class temp(0);
+
   // Main sequence.
-  mpf_class* arr = new mpf_class[MAX_ARR_SIZE];
+  mpz_class* arr = new mpz_class[MAX_ARR_SIZE];
   size_t size = 0;
 
   string line;
@@ -163,31 +90,78 @@ int main (int argc, char **argv) {
   std::getline(cin, line);
   stringstream lineStream(line);
 
-  mpf_class input_val;
-  input_val.set_prec(accuracy);
+  mpz_class input_val;
+
   while (true)
   {
     if(!(lineStream >> input_val)) break;
     sum += input_val;
-    arr[size] = input_val*input_val;
+    arr[size] = input_val * input_val;
+    varSum += arr[size];
     size++;
   }
 
   meanValue = sum / size;
-  meanValueSquare = meanValue * meanValue;
-#ifdef LOG_INFO
- // cout << "Starting prog <size of arr: " << size <<  ">" << endl;
-#endif
-  string dupa;
-  cout.precision(printAccuracy+getPrec(meanValue));
-  cout <<  meanValue << endl;
-  varValue = varVal(arr,size,accuracy,meanValueSquare);
-  cout.precision(printAccuracy+getPrec(varValue));
-  cout << varValue << endl;
-  periodValue = periodVal(arr, size, accuracy);
-  cout.precision(printAccuracy+getPrec(periodValue));
-  cout << periodValue << endl;
-//  cout << getPrec(meanValue) << endl;
+  varSum = size * varSum - sum *sum;
+  varValue = varSum/(size*size);
+
+  remainderMeanValue = abs(sum - meanValue*size);
+  remainderVarValue = abs(varSum - varValue *(size*size));
+
+  if ( remainderMeanValue != 0){
+    char* numberMean;
+    for (int i=0;i<accuracy;i++)
+    {
+      remainderMeanValue *=10;
+      temp = remainderMeanValue / size;
+      remainderMeanValue = abs(remainderMeanValue - temp * size);
+      numberMean = mpz_get_str(NULL,10,temp.get_mpz_t());
+      decimalMeanValue.append(numberMean);
+    }
+    for (int i = decimalMeanValue.size() -1 ; i>=0 ; i--)
+    {
+      if (decimalMeanValue[i] == '0') decimalMeanValue.erase(i,1);
+      else break;
+    }
+
+    cout << meanValue << ".";
+    cout.precision(accuracy);
+    //decimalMeanValue.resize(accuracy);
+    cout << decimalMeanValue << endl;
+
+  }
+  else {
+    cout << meanValue << endl;
+  }
+
+  if (remainderVarValue != 0){
+    char* numberVar;
+    for (int i=0;i<accuracy;i++)
+    {
+      remainderVarValue *=10;
+      temp = remainderVarValue / (size * size);
+      remainderVarValue = abs(remainderVarValue - temp * (size * size));
+      numberVar = mpz_get_str(NULL,10,temp.get_mpz_t());
+      cout << numberVar ;
+      decimalVarValue.append(numberVar);
+    }
+    for (int i = decimalVarValue.size() - 1; i>=0; i-- )
+    {
+      if (decimalVarValue[i] == '0') decimalVarValue.erase(i,1);
+      else break;
+    }
+    cout << endl;
+    cout << varValue << ".";
+    cout.precision(accuracy);
+    //decimalVarValue.resize(accuracy);
+    cout <<  decimalVarValue << endl;
+  }
+  else {
+    cout << varValue <<endl;
+  }
+  cout.precision(accuracy);
+  cout << periodVal(arr,size,accuracy) << endl;
+
   delete[](arr);
   return 0;
 }
