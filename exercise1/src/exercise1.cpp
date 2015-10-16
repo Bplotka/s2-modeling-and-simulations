@@ -54,9 +54,12 @@ int main (int argc, char **argv) {
   // Max elem | value |: 2^64 = 18446744073709551616
   int accuracy = MAX_PRECISION; // Default printAccuracy.
 
-  accuracy = atoi(argv[1]);
-  if (accuracy < 1  && accuracy > MAX_PRECISION)
-    return FAILURE;
+  if (argc > 1) {
+    accuracy = atoi(argv[1]);
+    if (accuracy < 1  && accuracy > MAX_PRECISION)
+      return FAILURE;
+  }
+
 
   string decimalMeanValue;
   string decimalVarValue;
