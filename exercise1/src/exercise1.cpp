@@ -12,16 +12,14 @@
 
 using namespace std;
 
-
-
 /**
- * implemented.
+ * Period Value calc.
  */
 mpf_class periodVal(const mpz_class* valuesArray, size_t size, size_t accuracy) {
   int current_period = 1;
   int minimal_period = size;
 
-  for(;;) 
+  while(true)
   {
       bool is_period_valid = true;
       for (long i = 1; i < size - current_period; i++) 
@@ -49,7 +47,6 @@ mpf_class periodVal(const mpz_class* valuesArray, size_t size, size_t accuracy) 
 
 /**
  * Main function.
- * Current time for test2: 11s
  */
 int main (int argc, char **argv) {
   // Cin && cout optimization.
@@ -59,8 +56,6 @@ int main (int argc, char **argv) {
   // Max elem | value |: 2^64 = 18446744073709551616
   int accuracy = MAX_PRECISION; // Default printAccuracy.
 
-
-  
   if (argc > 1) {
     accuracy = atoi(argv[1]);
     if (accuracy < 1  && accuracy > MAX_PRECISION)
@@ -89,6 +84,8 @@ int main (int argc, char **argv) {
 #ifdef LOG_INFO
   cout << "Enter input in one line:" << endl;
 #endif
+
+  // Getting data from stdin.
   std::getline(cin, line);
   stringstream lineStream(line);
 
@@ -116,24 +113,22 @@ int main (int argc, char **argv) {
      char* numberMean;
     for (int i=0;i<accuracy;i++)
     {
-      remainderMeanValue *=10;
+      remainderMeanValue *= 10;
       temp = remainderMeanValue / size;
-      remainderMeanValue = abs(remainderMeanValue - temp * size);
+      remainderMeanValue = abs(remainderMeanValue - (temp * size));
       numberMean = mpz_get_str(NULL, 10, temp.get_mpz_t());
       decimalMeanValue.append(numberMean);
     }
-    for (int i = decimalMeanValue.size() -1 ; i>=0 ; i--)
+    for (int i = decimalMeanValue.size() -1 ; i >= 0 ; i--)
     {
       if (decimalMeanValue[i] == '0')
         decimalMeanValue.erase(i);
       else
         break;
     }
-
     cout << meanValue << ".";
     cout.precision(accuracy);
     cout << decimalMeanValue << endl;
-
   }
   else {
     cout << meanValue << endl;
@@ -143,13 +138,14 @@ int main (int argc, char **argv) {
      char* numberVar;
     for (int i=0;i<accuracy;i++)
     {
-      remainderVarValue *=10;
+      remainderVarValue *= 10;
       temp = remainderVarValue / (size * size ) ;
       remainderVarValue = abs(remainderVarValue - temp * (size * size));
-      numberVar = mpz_get_str(NULL,10,temp.get_mpz_t());
+      numberVar = mpz_get_str(NULL, 10, temp.get_mpz_t());
       decimalVarValue.append(numberVar);
     }
-    for (int i = decimalVarValue.size() - 1; i>=0; i-- ) {
+
+    for (int i = decimalVarValue.size() - 1; i >= 0 ; i-- ) {
       if (decimalVarValue[i] == '0')
         decimalVarValue.erase(i);
       else
