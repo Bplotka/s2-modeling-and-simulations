@@ -126,7 +126,6 @@ int main (int argc, char **argv) {
 
     cout << meanValue << ".";
     cout.precision(accuracy);
-    //decimalMeanValue.resize(accuracy);
     cout << decimalMeanValue << endl;
 
   }
@@ -142,18 +141,14 @@ int main (int argc, char **argv) {
       temp = remainderVarValue / (size * size);
       remainderVarValue = abs(remainderVarValue - temp * (size * size));
       numberVar = mpz_get_str(NULL,10,temp.get_mpz_t());
-      cout << numberVar ;
       decimalVarValue.append(numberVar);
     }
-    for (int i = decimalVarValue.size() - 1; i>=0; i-- )
-    {
-      if (decimalVarValue[i] == '0') decimalVarValue.erase(i,1);
+    for (int i = decimalVarValue.size() - 1; i>=0; i-- ) {
+      if (decimalVarValue[i] == '0') decimalVarValue.erase(i, 1);
       else break;
     }
-    cout << endl;
     cout << varValue << ".";
     cout.precision(accuracy);
-    //decimalVarValue.resize(accuracy);
     cout <<  decimalVarValue << endl;
   }
   else {
