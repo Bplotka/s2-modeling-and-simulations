@@ -6,17 +6,12 @@
 #define FAILURE 1
 
 #define MAX_ARR_SIZE 16777216
-#define MAX_PRECISION 65536
+#define MAX_PRECISION 65532
 #define PRECISSION_MUL 4
 //#define LOG_INFO
 
 using namespace std;
 
-
-
-/**
- * implemented.
- */
 mpf_class periodVal(const mpz_class* valuesArray, size_t size, size_t accuracy) {
   int current_period = 1;
   int minimal_period = size;
@@ -59,8 +54,6 @@ int main (int argc, char **argv) {
   // Max elem | value |: 2^64 = 18446744073709551616
   int accuracy = MAX_PRECISION; // Default printAccuracy.
 
-
-
   accuracy = atoi(argv[1]);
   if (accuracy < 1  && accuracy > MAX_PRECISION)
     return FAILURE;
@@ -102,13 +95,13 @@ int main (int argc, char **argv) {
   }
 
   meanValue = sum / size;
-  varSum = size * varSum - sum *sum;
-  varValue = varSum/(size*size);
+  varSum = (size * varSum) - (sum * sum);
+  varValue = varSum / (size * size);
 
-  remainderMeanValue = abs(sum - meanValue*size);
-  remainderVarValue = abs(varSum - varValue *(size*size));
+  remainderMeanValue = abs(sum - (meanValue * size));
+  remainderVarValue = abs(varSum - (varValue * (size * size)));
 
-  if ( remainderMeanValue != 0){
+  if (remainderMeanValue != 0) {
     char* numberMean;
     for (int i=0;i<accuracy;i++)
     {
@@ -118,6 +111,7 @@ int main (int argc, char **argv) {
       numberMean = mpz_get_str(NULL,10,temp.get_mpz_t());
       decimalMeanValue.append(numberMean);
     }
+
     for (int i = decimalMeanValue.size() -1 ; i>=0 ; i--)
     {
       if (decimalMeanValue[i] == '0') decimalMeanValue.erase(i,1);
@@ -127,20 +121,19 @@ int main (int argc, char **argv) {
     cout << meanValue << ".";
     cout.precision(accuracy);
     cout << decimalMeanValue << endl;
-
   }
   else {
     cout << meanValue << endl;
   }
 
-  if (remainderVarValue != 0){
+  if (remainderVarValue != 0) {
     char* numberVar;
     for (int i=0;i<accuracy;i++)
     {
-      remainderVarValue *=10;
+      remainderVarValue *= 10;
       temp = remainderVarValue / (size * size);
       remainderVarValue = abs(remainderVarValue - temp * (size * size));
-      numberVar = mpz_get_str(NULL,10,temp.get_mpz_t());
+      numberVar = mpz_get_str(NULL, 10, temp.get_mpz_t());
       decimalVarValue.append(numberVar);
     }
     for (int i = decimalVarValue.size() - 1; i>=0; i-- ) {
@@ -155,7 +148,7 @@ int main (int argc, char **argv) {
     cout << varValue <<endl;
   }
   cout.precision(accuracy);
-  cout << periodVal(arr,size,accuracy) << endl;
+  cout << periodVal(arr, size, accuracy) << endl;
 
   delete[](arr);
   return 0;
