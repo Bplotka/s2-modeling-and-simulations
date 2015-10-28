@@ -1,8 +1,9 @@
 #include <gmpxx.h>
 #include <iostream>
+#include <iomanip>
 #include <algorithm>
-#include <sstream>
 #include <string>
+#include <sstream>
 
 // Custom defines
 #define SUCCESS 0
@@ -16,6 +17,15 @@
 #define MAX_PRECISION 65536
 
 using namespace std;
+
+string fix(mpf_class x, int p)
+{
+    ostringstream strout ;
+    strout << fixed << setprecision(p) << x;
+    string str = strout.str() ;
+    size_t end = str.find_last_not_of( '0' ) + 1;
+    return str.erase(end);
+}
 
 // Main function.
 int main (int argc, char **argv) {
@@ -36,7 +46,7 @@ int main (int argc, char **argv) {
         return FAILURE;
     }
 
-    #ifdef LOG_INFO
+    #ifdef DEBUG
     cout << "Precision: " << accuracy << endl;
     #endif
 
@@ -59,12 +69,12 @@ int main (int argc, char **argv) {
         return FAILURE;
     }
 
-    #ifdef LOG_INFO
+    #ifdef DEBUG
     cout << "Array size: " << array_size << endl;
     #endif
 
     // Sort array
-    sort(data_array, data_array + array_size); // Not sure if correct
+    sort(data_array, data_array + array_size);
 
     // Kolmogorov test
     mpq_class k_plus;
@@ -82,9 +92,9 @@ int main (int argc, char **argv) {
             k_minus = tmp_k_minus;
         }
     }
-
-    cout << mpf_class(k_plus, accuracy) << endl;
-    cout << mpf_class(k_minus, accuracy) << endl;
+    
+    cout << fix(mpf_class(k_plus, MAX_PRECISION), accuracy) << endl;
+    cout << fix(mpf_class(k_minus, MAX_PRECISION), accuracy) << endl;
 
     return SUCCESS;
 }
