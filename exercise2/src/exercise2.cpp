@@ -18,21 +18,33 @@
 
 using namespace std;
 
-string fix(mpf_class x, int p)
+string getPrettyString(mpf_class x, int p)
 {
-    ostringstream strout ;
-    strout << fixed << setprecision(p) << x;
+    ostringstream strout;
+    strout << fixed << setprecision(p+1) << x;
     string str = strout.str() ;
     size_t end = str.find_last_not_of( '0' ) + 1;
-    return str.erase(end);
+    str = str.erase(end);    
+    
+    // This is beautiful
+    if(str[str.size()-1] == '.')
+    {
+        str = str.substr(0, str.size()-1);
+    }
+    else 
+    {
+        str = str.substr(0, str.size()-1);
+    }
+    
+    return str;
 }
 
 // Main function.
-int main (int argc, char **argv) {
+int main(int argc, char **argv) {
     // Cin && cout optimization.
     std::ios_base::sync_with_stdio(false);
 
-    if (argc < 2) 
+    if(argc < 2) 
     {
         cout << "Not enough parameters!" << endl;
         return FAILURE;
@@ -40,7 +52,7 @@ int main (int argc, char **argv) {
 
     int accuracy = 0;
     accuracy = atoi(argv[1]);
-    if (accuracy < 1  || accuracy > MAX_PRECISION)
+    if(accuracy < 1  || accuracy > MAX_PRECISION)
     {
         cout << "Invalid precison" << endl;
         return FAILURE;
@@ -75,26 +87,53 @@ int main (int argc, char **argv) {
 
     // Sort array
     sort(data_array, data_array + array_size);
-
+    
+    //Pearson's chi-squared test
+    mpq_class chi;
+    int k = 10;
+    for(int i = 1; i <= k; i++)
+    {
+        // Calculate stuff needed for pi & npi
+        mpq_class ai = mpq_class(i*i, 100);
+        mpq_class ai_prev = mpq_class((i-1)*(i-1), 100);
+        
+        mpq_class pi = ai - ai_prev;
+        mpq_class npi = pi * array_size;
+        
+        // Calculate Yi "size"
+        int YiSize = 0;
+        for(int j = 0; j < array_size; j++)
+        {
+            if((data_array[j] >= ai_prev) && (data_array[j] < ai))
+            {
+                YiSize += 1;
+            }
+        }
+        mpq_class Yi = mpq_class(YiSize);
+        chi += ((Yi-npi)*(Yi-npi))/npi;
+    }
+    
+    cout << getPrettyString(mpf_class(chi, MAX_PRECISION), accuracy) << endl;
+    
     // Kolmogorov test
     mpq_class k_plus;
     mpq_class k_minus;
-    for (int i = 1; i < array_size; ++i) 
+    for(int i = 1; i < array_size; ++i) 
     {
-        mpq_class tmp_k_plus = mpq_class(i, array_size) - data_array[i - 1];
-        mpq_class tmp_k_minus = data_array[i - 1] - mpq_class(i - 1, array_size);
-        if (tmp_k_plus > k_plus) 
+        mpq_class latest_good_k_plus = mpq_class(i, array_size) - data_array[i - 1];
+        mpq_class latest_good_k_minus = data_array[i - 1] - mpq_class(i - 1, array_size);
+        if (latest_good_k_plus > k_plus) 
         {
-            k_plus = tmp_k_plus;
+            k_plus = latest_good_k_plus;
         }
-        if (tmp_k_minus > k_minus) 
+        if (latest_good_k_minus > k_minus) 
         {
-            k_minus = tmp_k_minus;
+            k_minus = latest_good_k_minus;
         }
     }
     
-    cout << fix(mpf_class(k_plus, MAX_PRECISION), accuracy) << endl;
-    cout << fix(mpf_class(k_minus, MAX_PRECISION), accuracy) << endl;
+    cout << getPrettyString(mpf_class(k_plus, MAX_PRECISION), accuracy) << endl;
+    cout << getPrettyString(mpf_class(k_minus, MAX_PRECISION), accuracy) << endl;
 
     return SUCCESS;
 }
