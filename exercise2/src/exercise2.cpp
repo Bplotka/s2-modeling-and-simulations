@@ -8,7 +8,7 @@
 // Custom defines
 #define SUCCESS 0
 #define FAILURE 1
-#define DEBUG
+//#define DEBUG
 
 // From specification
 // Max size of input array: 2^24 = 16777216
@@ -134,6 +134,69 @@ int main(int argc, char **argv) {
     
     cout << getPrettyString(mpf_class(k_plus, MAX_PRECISION), accuracy) << endl;
     cout << getPrettyString(mpf_class(k_minus, MAX_PRECISION), accuracy) << endl;
+    
+    // The Sum Test
+    if(array_size % 2 != 0)
+    {
+        cout << "Array size is odd" << endl;
+        return FAILURE;
+    }
+    
+    int t = 2;
+    int v_i_length = (array_size / t);
+    mpq_class* vi_data_array = new mpq_class[(array_size/2)];
+    
+    // Create Vi's
+    for(int i = 1; i <= v_i_length; i++)
+    {
+        //Sigma
+        mpq_class vi;      
+        for(int j = ((t*i)-(t+1)); j <= (t*i); j++)
+        {
+            if(j <= 0)
+            {
+                continue;
+            }
+            
+            vi += data_array[j-1];
+        }
+        
+        vi_data_array[i - 1] = vi;
+    }
+    
+    // Sort array
+    sort(vi_data_array, vi_data_array + v_i_length);
+    
+    // Kolmogorov test on Vi
+    mpq_class k_plus_vi;
+    mpq_class k_minus_vi;
+    for(int i = 1; i < v_i_length; ++i) 
+    {
+        // CDF for t = 2
+        mpq_class fx;
+        if(vi_data_array[i - 1] <= 1 && vi_data_array[i - 1] >= 0)
+        {
+            fx = (vi_data_array[i - 1] * vi_data_array[i - 1]) * mpq_class(1,2);
+        }
+        else
+        {
+            fx = 1 - mpq_class(1,2) * ( (2 - vi_data_array[i - 1]) * (2 - vi_data_array[i - 1]) );
+        }
 
+        mpq_class latest_good_k_plus_vi = mpq_class(i, v_i_length) - fx;
+        mpq_class latest_good_k_minus_vi = fx - mpq_class(i - 1, v_i_length);
+        if (latest_good_k_plus_vi > k_plus_vi) 
+        {
+            k_plus_vi = latest_good_k_plus_vi;
+        }
+        if (latest_good_k_minus_vi > k_minus_vi) 
+        {
+            k_minus_vi = latest_good_k_minus_vi;
+        }
+    }
+    
+    cout << getPrettyString(mpf_class(k_plus_vi, MAX_PRECISION), accuracy) << endl;
+    cout << getPrettyString(mpf_class(k_minus_vi, MAX_PRECISION), accuracy) << endl;
+    
     return SUCCESS;
 }
