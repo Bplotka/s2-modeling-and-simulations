@@ -22,16 +22,13 @@ string getPrettyString(mpf_class x, int p)
 {
     ostringstream strout;
     strout << fixed << setprecision(p+1) << x;
-    string str = strout.str() ;
+    string str = strout.str();
+    str = str.substr(0, str.size()-1);
     size_t end = str.find_last_not_of( '0' ) + 1;
     str = str.erase(end);    
     
     // This is beautiful
     if(str[str.size()-1] == '.')
-    {
-        str = str.substr(0, str.size()-1);
-    }
-    else 
     {
         str = str.substr(0, str.size()-1);
     }
@@ -151,7 +148,7 @@ int main(int argc, char **argv) {
     {
         //Sigma
         mpq_class vi;      
-        for(int j = ((t*i)-(t+1)); j <= (t*i); j++)
+        for(int j = ((t*i)-t+1); j <= (t*i); j++)
         {
             if(j <= 0)
             {
