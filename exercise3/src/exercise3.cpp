@@ -39,7 +39,7 @@ class PPGGenerator {
    * rands = array with output elements
    * sequenceLength = quantity of numbers to generate
    */
-  virtual void randSequence(int64_t rands[], int64_t sequenceLength) {
+  virtual void randSequence(int64_t rands[], size_t sequenceLength) {
     throw NotImplementedException();
   }
 
@@ -73,7 +73,7 @@ class Fibonacci : public PPGGenerator {
     this->seed = _seed;
   }
 
-  void randSequence(int64_t rands[], int64_t sequenceLength) {
+  void randSequence(int64_t rands[], size_t sequenceLength) {
     int64_t work_arr[sequenceLength + this->seed.size()];
     for (size_t i = 0; i < this->seed.size(); i++) {
       work_arr[i] = this->seed[i];
@@ -110,7 +110,7 @@ public:
     this->seed = _seed;
   }
 
-  void randSequence(int64_t rands[], int64_t sequenceLength) {
+  void randSequence(int64_t rands[], size_t sequenceLength) {
     int64_t work_arr[sequenceLength + this->seed.size()];
     for (size_t i = 0; i < this->seed.size(); i++) {
       work_arr[i] = this->seed[i];
