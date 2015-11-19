@@ -119,6 +119,7 @@ public:
     for (size_t i = this->seed.size(); i < sequenceLength + this->seed.size(); i++) {
       if (work_arr[i-this->qParam] == 0)
       {
+        // TODO: Question to Janczewski how to deal / 0?
         work_arr[i] = (work_arr[i-this->pParam] / 1) % this -> modulo;
       } else {
         work_arr[i] = (work_arr[i-this->pParam] / work_arr[i-this->qParam] )
@@ -170,9 +171,6 @@ public:
     }
   }
 
-private:
-  int64_t bitSize;
-
   int getBits(int num){
     int count=0;
     while (num) {
@@ -181,6 +179,11 @@ private:
     }
     return count;
   }
+
+
+private:
+  int64_t bitSize;
+
 };
 
 
@@ -191,6 +194,7 @@ void help() {
 
 enum Generators: int {
   FIBONACCI = 0,
+  FIBONACCI_MOD,
   TAUSWORTH
 };
 
@@ -264,10 +268,18 @@ int main(int argc, char **argv) {
       generator = new Fibonacci(seed, modulo, pParam, qParam);
       break;
     }
+    case Generators::FIBONACCI_MOD:
+    {
+      int64_t modulo = range[1] - range[0];
+      modifier = range[0];
+      generator = new FibonacciMod(seed, modulo, pParam, qParam);
+      break;
+    }
     case Generators::TAUSWORTH:
     {
       // TODO: evaulate bitSize from range.
-      int64_t bitSize = 4;
+      // TODO: Question to Janczewski how to deal here with range?
+      int64_t bitSize = range[1]; // For now.
       generator = new Tausworth(seed, bitSize, pParam, qParam);
       break;
     }
