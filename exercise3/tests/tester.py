@@ -56,20 +56,53 @@ def test(generatorName, generatorType, seed, p, q, rangeBegin, rangeEnd, iterati
         statsFile.flush()
         statsFile.close()
 
-build()
 
-with open("all.stats", 'a+') as statsFile:
-        header = "---- New test packet. MODULO: " + MODULO + "; BIT_SIZE: " + BIT_SIZE + " ---- \n"
-        statsFile.write(header)
-        statsFile.flush()
-        statsFile.close()
+def test_ranges(generatorName, generatorType, seed, p, q, rangeBegin, rangeEnd, packetSize):
+    for i in xrange(rangeBegin, rangeEnd, packetSize):
+        print str(i) + " - " + str(i + packetSize)
+        test(generatorName, generatorType, seed, p, q, i, i + packetSize, 1)
 
-# for example: test("fibonacci", 1, "256 128 64 32 16", 5, 3, 256, 356, 100)
-test("fibonacci1", 1, "256 128 64 32 16", 5, 3, 256, 356, 10)
-test("fibonacci2", 1, "256 128 64 32 16 8", 6, 3, 256, 356, 10)
 
-test("t1", 2, "256", 5, 3, 256, 356, 10)
-test("t2", 2, "23424", 6, 3, 256, 356, 10)
+def scenario1():
+    build()
 
-test("mix1", 3, "256 128 64 32 16", 5, 3, 256, 356, 10)
-test("mix2", 3, "256 128 64 32 16 8", 6, 3, 256, 356, 10)
+    with open("all.stats", 'a+') as statsFile:
+            header = "---- New Scenario. MODULO: " + MODULO + "; BIT_SIZE: " + BIT_SIZE + " ---- \n"
+            statsFile.write(header)
+            statsFile.flush()
+            statsFile.close()
+
+    # for example: test("fibonacci", 1, "256 128 64 32 16", 5, 3, 256, 356, 100)
+    test("fibonacci1", 1, "256 128 64 32 16", 5, 3, 256, 356, 10)
+    test("fibonacci2", 1, "256 128 64 32 16 8", 6, 3, 256, 356, 10)
+
+    test("t1", 2, "256", 5, 3, 256, 356, 10)
+    test("t2", 2, "23424", 6, 3, 256, 356, 10)
+
+    test("mix1", 3, "256 128 64 32 16", 5, 3, 256, 356, 10)
+    test("mix2", 3, "256 128 64 32 16 8", 6, 3, 256, 356, 10)
+
+def scenarioRangesFib():
+    build()
+
+    with open("all.stats", 'a+') as statsFile:
+            header = "---- New Scenario. Ranges! MODULO: " + MODULO + "; BIT_SIZE: " + BIT_SIZE + " ---- \n"
+            statsFile.write(header)
+            statsFile.flush()
+            statsFile.close()
+
+    test_ranges("fibonacci", 1, "256 128 64 32 16", 5, 3, 0, 400000, 40000)
+
+
+def scenarioRangesTau():
+    build()
+
+    with open("all.stats", 'a+') as statsFile:
+            header = "---- New Scenario. Ranges! MODULO: " + MODULO + "; BIT_SIZE: " + BIT_SIZE + " ---- \n"
+            statsFile.write(header)
+            statsFile.flush()
+            statsFile.close()
+
+    test_ranges("tau", 1, "256 128 64 32 16", 5, 3, 0, 400000, 40000)
+
+scenarioRangesTau()
