@@ -12,6 +12,8 @@
 
 using namespace std;
 
+typedef uint64_t OutType;
+
 class NotImplementedException : public logic_error
 {
 public:
@@ -25,12 +27,12 @@ public:
 class PPGGenerator {
  public:
   explicit PPGGenerator(
-    const vector<int64_t>& _seed, int64_t _pParam, int64_t _qParam)
+    const vector<uint64_t>& _seed, uint64_t _pParam, uint64_t _qParam)
       : PPGGenerator(_pParam,_qParam) {
     this->setSeed(_seed);
   }
 
-  explicit PPGGenerator(int64_t _pParam, int64_t _qParam)
+  explicit PPGGenerator(uint64_t _pParam, uint64_t _qParam)
       : pParam(_pParam), qParam(_qParam) {}
 
   virtual int64_t randNext(int seed[]) { throw NotImplementedException(); }
@@ -39,18 +41,18 @@ class PPGGenerator {
    * rands = array with output elements
    * sequenceLength = quantity of numbers to generate
    */
-  virtual void randSequence(int64_t rands[], size_t sequenceLength) {
+  virtual void randSequence(uint64_t rands[], size_t sequenceLength) {
     throw NotImplementedException();
   }
 
-  virtual void setSeed(const vector<int64_t>& _seed) {
+  virtual void setSeed(const vector<uint64_t>& _seed) {
     this->seed = _seed;
   }
 
  protected:
-  int64_t pParam;
-  int64_t qParam;
-  vector<int64_t> seed;
+  uint64_t pParam;
+  uint64_t qParam;
+  vector<uint64_t> seed;
 };
 
 
@@ -61,19 +63,19 @@ class Fibonacci : public PPGGenerator {
    * pParam = pParam > qParam and pParam =< initSize
    * qParam = qparam < pParam and qParam =< initSize
    */
-  Fibonacci(const vector<int64_t>& _seed,
-            int64_t _modulo,
-            int64_t _pParam,
-            int64_t _qParam)
+  Fibonacci(const vector<uint64_t>& _seed,
+            uint64_t _modulo,
+            uint64_t _pParam,
+            uint64_t _qParam)
           : modulo(_modulo), PPGGenerator(_seed, _pParam, _qParam) {}
 
-  virtual void setSeed(const vector<int64_t>& _seed) {
+  virtual void setSeed(const vector<uint64_t>& _seed) {
     if (this->pParam > _seed.size() or this->qParam > _seed.size())
       throw invalid_argument("seed size lower then p or q parameter");
     this->seed = _seed;
   }
 
-  void randSequence(int64_t rands[], size_t sequenceLength) {
+  void randSequence(uint64_t rands[], size_t sequenceLength) {
     for (size_t i = 0; i < this->seed.size(); i++) {
       rands[i] = this->seed[i];
     }
@@ -85,7 +87,7 @@ class Fibonacci : public PPGGenerator {
   }
 
 private:
-    int64_t modulo;
+    uint64_t modulo;
 };
 
 
@@ -96,22 +98,22 @@ public:
    * pParam = pParam > qParam and pParam =< initSize
    * qParam = qparam < pParam and qParam =< initSize
    */
-  FibonacciMod(const vector<int64_t>& _seed,
-            int64_t _modulo,
-            int64_t _pParam,
-            int64_t _qParam,
-            int64_t _zeroReplacement = 1)
+  FibonacciMod(const vector<uint64_t>& _seed,
+            uint64_t _modulo,
+            uint64_t _pParam,
+            uint64_t _qParam,
+            uint64_t _zeroReplacement = 1)
     : modulo(_modulo),
       zeroReplacement(_zeroReplacement),
       PPGGenerator(_seed, _pParam, _qParam) {}
 
-  virtual void setSeed(const vector<int64_t>& _seed) {
+  virtual void setSeed(const vector<uint64_t>& _seed) {
     if (this->pParam > _seed.size() or this->qParam > _seed.size())
       throw invalid_argument("seed size lower then p or q parameter");
     this->seed = _seed;
   }
 
-  void randSequence(int64_t rands[], size_t sequenceLength) {
+  void randSequence(uint64_t rands[], size_t sequenceLength) {
     for (size_t i = 0; i < this->seed.size(); i++) {
       rands[i] = this->seed[i];
     }
@@ -119,7 +121,6 @@ public:
     for (size_t i = this->seed.size(); i < sequenceLength + this->seed.size(); i++) {
       rands[i]  = (rands[i-this->pParam] + rands[i-this->qParam])
                   % this -> modulo;
-
       if (rands[i-this->qParam] == 0)
       {
         rands[i] =
@@ -132,8 +133,8 @@ public:
   }
 
 private:
-  int64_t modulo;
-  int64_t zeroReplacement;
+  uint64_t modulo;
+  uint64_t zeroReplacement;
 };
 
 
@@ -144,20 +145,20 @@ public:
    * pParam = pParam > qParam and pParam =< initSize
    * qParam = qparam < pParam and qParam =< initSize
    */
-  Tausworth(const vector<int64_t>& _seed,
-            int64_t _bitSize,
-            int64_t _pParam,
-            int64_t _qParam)
+  Tausworth(const vector<uint64_t>& _seed,
+            uint64_t _bitSize,
+            uint64_t _pParam,
+            uint64_t _qParam)
     : bitSize(_bitSize), PPGGenerator(_seed, _pParam, _qParam) {}
 
-  virtual void setSeed(const vector<int64_t>& _seed) {
+  virtual void setSeed(const vector<uint64_t>& _seed) {
     if (this->pParam > _seed.size() or this->qParam > _seed.size())
       throw invalid_argument("seed size lower then p or q parameter");
     this->seed = _seed;
   }
 
-  void randSequence(int64_t rands[], size_t sequenceLength) {
-    int bitCount = getBits(this->seed[0]);
+  void randSequence(uint64_t rands[], size_t sequenceLength) {
+    uint64_t bitCount = getBits(this->seed[0]);
     bitset<1000000> binarySeed(this->seed[0]);
     for (int i = bitCount; i < sequenceLength * bitSize; i++) {
       binarySeed[i] = (binarySeed[i-this->pParam] == binarySeed[i-this->qParam]) ? 0 : 1;
@@ -165,18 +166,17 @@ public:
     int bitPosition = 0;
 
     for (size_t i = 0; i < sequenceLength; i++) {
-      int result = 0;
+      uint64_t result = 0;
       for(int j = 0; j< bitSize; j++) {
-        cout << (int64_t) (binarySeed[bitPosition] << j) << endl;
-        result += (int64_t) (binarySeed[bitPosition] << j);
+        result += (uint64_t) (binarySeed[bitPosition] << j);
         bitPosition++;
       }
       rands[i] = result;
     }
   }
 
-  int getBits(int num){
-    int count=0;
+  uint64_t getBits(uint64_t num){
+    uint64_t count=0;
     while (num) {
       num = num>>1;
       ++count;
@@ -186,7 +186,7 @@ public:
 
 
 private:
-  int64_t bitSize;
+  uint64_t bitSize;
 };
 
 
@@ -198,21 +198,21 @@ public:
    * pParam = pParam > qParam and pParam =< initSize
    * qParam = qparam < pParam and qParam =< initSize
    */
-  MixMinium(const vector<int64_t>& _seed1,
-            const vector<int64_t>& _seed2,
-            int64_t _modulo,
-            int64_t _bitSize,
-            int64_t _pParam1,
-            int64_t _qParam1,
-            int64_t _pParam2,
-            int64_t _qParam2)
+  MixMinium(const vector<uint64_t>& _seed1,
+            const vector<uint64_t>& _seed2,
+            uint64_t _modulo,
+            uint64_t _bitSize,
+            uint64_t _pParam1,
+            uint64_t _qParam1,
+            uint64_t _pParam2,
+            uint64_t _qParam2)
     : fibonacciMod(FibonacciMod(_seed1, _modulo, _pParam1, _qParam1)),
       tausworth(Tausworth(_seed2, _bitSize, _pParam2, _qParam2)),
       PPGGenerator({}, 0, 0) {}
 
-  void randSequence(int64_t rands[], size_t sequenceLength) {
-    int64_t fibonacciModRands[sequenceLength];
-    int64_t tausworthRands[sequenceLength];
+  void randSequence(uint64_t rands[], size_t sequenceLength) {
+    uint64_t fibonacciModRands[sequenceLength];
+    uint64_t tausworthRands[sequenceLength];
 
     fibonacciMod.randSequence(fibonacciModRands, sequenceLength);
     tausworth.randSequence(tausworthRands, sequenceLength);
@@ -239,11 +239,11 @@ enum Generators: int {
 
 PPGGenerator* createPPGGenerator(
     int generatorType,
-    vector<int64_t> seed,
-    int64_t pParam,
-    int64_t qParam,
-    int64_t modulo,
-    int64_t bitSize) {
+    vector<uint64_t> seed,
+    uint64_t pParam,
+    uint64_t qParam,
+    uint64_t modulo,
+    uint64_t bitSize) {
 
   switch(generatorType) {
     default:
@@ -279,13 +279,13 @@ void help() {
 
 int main(int argc, char **argv) {
   int generatorType = -1;
-  int64_t pParam = 1;
-  int64_t qParam = 1;
+  uint64_t pParam = 1;
+  uint64_t qParam = 1;
   size_t range[2] = {0, 100};
-  int64_t modulo = 4294967296;
-  int64_t bitSize = 32;
+  uint64_t modulo = 4294967296;
+  uint64_t bitSize = 32;
   int c;
-  vector<int64_t> seed;
+  vector<uint64_t> seed;
 
   opterr = 0;
   while ((c = getopt(argc, argv, "t:p:q:b:s:m:e:h")) != -1)
@@ -294,22 +294,22 @@ int main(int argc, char **argv) {
         generatorType = atoi(optarg);
         break;
       case 'p':
-        pParam = atoi(optarg);
+        pParam = stoul(optarg);
         break;
       case 'q':
-        qParam = atoi(optarg);
+        qParam = stoul(optarg);
         break;
       case 'b': // range begin.
-        range[0] = atoi(optarg);
+        range[0] = stoul(optarg);
         break;
       case 'e': // range end.
-        range[1] = atoi(optarg);
+        range[1] = stoul(optarg);
         break;
       case 'm': // modulo.
-        modulo = atoi(optarg);
+        modulo = stoul(optarg);
         break;
       case 's': // bitSize.
-        bitSize = atoi(optarg);
+        bitSize = stoul(optarg);
         break;
       case 'h': //help.
         help();
@@ -354,7 +354,7 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  int64_t rands[range[1]];
+  uint64_t rands[range[1]];
 
   generator->randSequence(rands, range[1]);
 
