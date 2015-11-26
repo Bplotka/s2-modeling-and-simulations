@@ -8,7 +8,7 @@
 #include <stdlib.h>
 
 #define SIZE 80
-#define MAX_SIZE 100000
+#define MAX_SIZE 16777216
 
 using namespace std;
 
@@ -100,7 +100,7 @@ public:
             int64_t _modulo,
             int64_t _pParam,
             int64_t _qParam,
-            int64_t _zeroReplacement = 3)
+            int64_t _zeroReplacement = 1)
     : modulo(_modulo),
       zeroReplacement(_zeroReplacement),
       PPGGenerator(_seed, _pParam, _qParam) {}
@@ -137,54 +137,6 @@ private:
 };
 
 
-class FibonacciModImproved : public PPGGenerator {
-public:
-  /*
-   * modulo = modulo parameter
-   * pParam = pParam > qParam and pParam =< initSize
-   * qParam = qparam < pParam and qParam =< initSize
-   */
-  FibonacciModImproved(const vector<int64_t>& _seed,
-               int64_t _modulo,
-               int64_t _pParam,
-               int64_t _qParam)
-    : modulo(_modulo),
-      PPGGenerator(_seed, _pParam, _qParam) {}
-
-  virtual void setSeed(const vector<int64_t>& _seed) {
-    if (this->pParam > _seed.size() or this->qParam > _seed.size())
-      throw invalid_argument("seed size lower then p or q parameter");
-    this->seed = _seed;
-  }
-
-  void randSequence(int64_t rands[], size_t sequenceLength) {
-    for (size_t i = 0; i < this->seed.size(); i++) {
-      rands[i] = this->seed[i];
-    }
-
-    for (size_t i = this->seed.size(); i < sequenceLength + this->seed.size(); i++) {
-      rands[i]  = (rands[i-this->pParam] + rands[i-this->qParam])
-                  % this -> modulo;
-
-      if (rands[i-this->qParam] == 0)
-      {
-        rands[i] =
-          (rands[i-this->pParam] / 2) % this -> modulo;
-      } else {
-        rands[i] = (rands[i - this->pParam] / rands[i - this->qParam])
-                   % this->modulo;
-      }
-    }
-  }
-
-private:
-  int64_t modulo;
-};
-
-
-
-
-// TODO() fix that!
 class Tausworth : public PPGGenerator {
 public:
   /*
@@ -215,6 +167,7 @@ public:
     for (size_t i = 0; i < sequenceLength; i++) {
       int result = 0;
       for(int j = 0; j< bitSize; j++) {
+        cout << (int64_t) (binarySeed[bitPosition] << j) << endl;
         result += (int64_t) (binarySeed[bitPosition] << j);
         bitPosition++;
       }
@@ -284,7 +237,7 @@ enum Generators: int {
 };
 
 
-PPGGenerator* createPPGGen_bitSizeerator(
+PPGGenerator* createPPGGenerator(
     int generatorType,
     vector<int64_t> seed,
     int64_t pParam,
@@ -329,8 +282,8 @@ int main(int argc, char **argv) {
   int64_t pParam = 1;
   int64_t qParam = 1;
   size_t range[2] = {0, 100};
-  int64_t modulo = 16;
-  int64_t bitSize = 4;
+  int64_t modulo = 4294967296;
+  int64_t bitSize = 32;
   int c;
   vector<int64_t> seed;
 
