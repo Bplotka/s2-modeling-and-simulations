@@ -168,7 +168,8 @@ public:
     for (size_t i = 0; i < sequenceLength; i++) {
       uint64_t result = 0;
       for(int j = 0; j< bitSize; j++) {
-        result += (uint64_t) (binarySeed[bitPosition] << j);
+        uint64_t bitValue = (uint64_t)(binarySeed[bitPosition]);
+        result +=  bitValue << j;
         bitPosition++;
       }
       rands[i] = result;
