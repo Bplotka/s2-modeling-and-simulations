@@ -105,7 +105,10 @@ public:
             uint64_t _zeroReplacement = 1)
     : modulo(_modulo),
       zeroReplacement(_zeroReplacement),
-      PPGGenerator(_seed, _pParam, _qParam) {}
+      PPGGenerator(_seed, _pParam, _qParam) {
+    //cout << this->modulo << " " << this->pParam << " " << this->qParam <<
+    // endl;
+  }
 
   virtual void setSeed(const vector<uint64_t>& _seed) {
     if (this->pParam > _seed.size() or this->qParam > _seed.size())
@@ -149,7 +152,10 @@ public:
             uint64_t _bitSize,
             uint64_t _pParam,
             uint64_t _qParam)
-    : bitSize(_bitSize), PPGGenerator(_seed, _pParam, _qParam) {}
+    : bitSize(_bitSize), PPGGenerator(_seed, _pParam, _qParam) {
+    // cout << this->bitSize << " " << this->pParam << " " << this->qParam <<
+      //endl;
+  }
 
   virtual void setSeed(const vector<uint64_t>& _seed) {
     if (this->pParam > _seed.size() or this->qParam > _seed.size())
@@ -212,14 +218,14 @@ public:
       PPGGenerator({}, 0, 0) {}
 
   void randSequence(uint64_t rands[], size_t sequenceLength) {
-    uint64_t fibonacciModRands[sequenceLength];
     uint64_t tausworthRands[sequenceLength];
+    uint64_t fibonacciModRands[sequenceLength];
 
-    fibonacciMod.randSequence(fibonacciModRands, sequenceLength);
     tausworth.randSequence(tausworthRands, sequenceLength);
+    fibonacciMod.randSequence(fibonacciModRands, sequenceLength);
 
     for (size_t i = 0; i < sequenceLength; i++) {
-      rands[i] = min(fibonacciModRands[i], tausworthRands[i]);
+      rands[i] = min(fibonacciModRands[i],  tausworthRands[i]);
     }
   }
 
@@ -328,7 +334,7 @@ int main(int argc, char **argv) {
     }
 
   for (int i = optind; i < argc; i++)
-    seed.push_back(atoi(argv[i]));
+    seed.push_back(stoul(argv[i]));
 
   if (seed.empty()) {
     cerr << "No seed provided!" << endl;
