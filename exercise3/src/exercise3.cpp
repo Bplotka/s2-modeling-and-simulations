@@ -74,15 +74,13 @@ class Fibonacci : public PPGGenerator {
   }
 
   void randSequence(int64_t rands[], size_t sequenceLength) {
-    int64_t work_arr[sequenceLength + this->seed.size()];
     for (size_t i = 0; i < this->seed.size(); i++) {
-      work_arr[i] = this->seed[i];
+      rands[i] = this->seed[i];
     }
 
     for (size_t i = this->seed.size(); i < sequenceLength + this->seed.size(); i++) {
-      work_arr[i] = (work_arr[i-this->pParam] + work_arr[i-this->qParam])
+      rands[i]  = (rands[i-this->pParam] + rands[i-this->qParam])
                       % this -> modulo;
-      rands[i-this->seed.size()] = work_arr[i];
     }
   }
 
@@ -101,8 +99,11 @@ public:
   FibonacciMod(const vector<int64_t>& _seed,
             int64_t _modulo,
             int64_t _pParam,
-            int64_t _qParam)
-    : modulo(_modulo), PPGGenerator(_seed, _pParam, _qParam) {}
+            int64_t _qParam,
+            int64_t _zeroReplacement = 3)
+    : modulo(_modulo),
+      zeroReplacement(_zeroReplacement),
+      PPGGenerator(_seed, _pParam, _qParam) {}
 
   virtual void setSeed(const vector<int64_t>& _seed) {
     if (this->pParam > _seed.size() or this->qParam > _seed.size())
@@ -111,22 +112,68 @@ public:
   }
 
   void randSequence(int64_t rands[], size_t sequenceLength) {
-    int64_t work_arr[sequenceLength + this->seed.size()];
     for (size_t i = 0; i < this->seed.size(); i++) {
-      work_arr[i] = this->seed[i];
+      rands[i] = this->seed[i];
     }
 
     for (size_t i = this->seed.size(); i < sequenceLength + this->seed.size(); i++) {
-      if (work_arr[i-this->qParam] == 0)
-      {
-        // TODO: Question to Janczewski how to deal / 0?
-        work_arr[i] = (work_arr[i-this->pParam] / 1) % this -> modulo;
-      } else {
-        work_arr[i] = (work_arr[i-this->pParam] / work_arr[i-this->qParam] )
-                      % this -> modulo;
-      }
+      rands[i]  = (rands[i-this->pParam] + rands[i-this->qParam])
+                  % this -> modulo;
 
-      rands[i-this->seed.size()] = work_arr[i];
+      if (rands[i-this->qParam] == 0)
+      {
+        rands[i] =
+          (rands[i-this->pParam] / this->zeroReplacement) % this -> modulo;
+      } else {
+        rands[i] = (rands[i - this->pParam] / rands[i - this->qParam])
+                      % this->modulo;
+      }
+    }
+  }
+
+private:
+  int64_t modulo;
+  int64_t zeroReplacement;
+};
+
+
+class FibonacciModImproved : public PPGGenerator {
+public:
+  /*
+   * modulo = modulo parameter
+   * pParam = pParam > qParam and pParam =< initSize
+   * qParam = qparam < pParam and qParam =< initSize
+   */
+  FibonacciModImproved(const vector<int64_t>& _seed,
+               int64_t _modulo,
+               int64_t _pParam,
+               int64_t _qParam)
+    : modulo(_modulo),
+      PPGGenerator(_seed, _pParam, _qParam) {}
+
+  virtual void setSeed(const vector<int64_t>& _seed) {
+    if (this->pParam > _seed.size() or this->qParam > _seed.size())
+      throw invalid_argument("seed size lower then p or q parameter");
+    this->seed = _seed;
+  }
+
+  void randSequence(int64_t rands[], size_t sequenceLength) {
+    for (size_t i = 0; i < this->seed.size(); i++) {
+      rands[i] = this->seed[i];
+    }
+
+    for (size_t i = this->seed.size(); i < sequenceLength + this->seed.size(); i++) {
+      rands[i]  = (rands[i-this->pParam] + rands[i-this->qParam])
+                  % this -> modulo;
+
+      if (rands[i-this->qParam] == 0)
+      {
+        rands[i] =
+          (rands[i-this->pParam] / 2) % this -> modulo;
+      } else {
+        rands[i] = (rands[i - this->pParam] / rands[i - this->qParam])
+                   % this->modulo;
+      }
     }
   }
 
@@ -134,6 +181,10 @@ private:
   int64_t modulo;
 };
 
+
+
+
+// TODO() fix that!
 class Tausworth : public PPGGenerator {
 public:
   /*
@@ -183,34 +234,108 @@ public:
 
 private:
   int64_t bitSize;
+};
 
+
+class MixMinium : public PPGGenerator {
+public:
+  /*
+   * modulo = modulo parameter
+   * bitSize = size of output elements
+   * pParam = pParam > qParam and pParam =< initSize
+   * qParam = qparam < pParam and qParam =< initSize
+   */
+  MixMinium(const vector<int64_t>& _seed1,
+            const vector<int64_t>& _seed2,
+            int64_t _modulo,
+            int64_t _bitSize,
+            int64_t _pParam1,
+            int64_t _qParam1,
+            int64_t _pParam2,
+            int64_t _qParam2)
+    : fibonacciMod(FibonacciMod(_seed1, _modulo, _pParam1, _qParam1)),
+      tausworth(Tausworth(_seed2, _bitSize, _pParam2, _qParam2)),
+      PPGGenerator({}, 0, 0) {}
+
+  void randSequence(int64_t rands[], size_t sequenceLength) {
+    int64_t fibonacciModRands[sequenceLength];
+    int64_t tausworthRands[sequenceLength];
+
+    fibonacciMod.randSequence(fibonacciModRands, sequenceLength);
+    tausworth.randSequence(tausworthRands, sequenceLength);
+
+    for (size_t i = 0; i < sequenceLength; i++) {
+      rands[i] = min(fibonacciModRands[i], tausworthRands[i]);
+    }
+  }
+
+ private:
+  Tausworth tausworth;
+  FibonacciMod fibonacciMod;
+};
+
+
+
+enum Generators: int {
+  FIBONACCI = 0,
+  FIBONACCI_MOD,
+  TAUSWORTH,
+  MIX_MINIMUM
+};
+
+
+PPGGenerator* createPPGGen_bitSizeerator(
+    int generatorType,
+    vector<int64_t> seed,
+    int64_t pParam,
+    int64_t qParam,
+    int64_t modulo,
+    int64_t bitSize) {
+
+  switch(generatorType) {
+    default:
+    case Generators::FIBONACCI: {
+      return new Fibonacci(seed, modulo, pParam, qParam);
+    }
+    case Generators::FIBONACCI_MOD: {
+      return new FibonacciMod(seed, modulo, pParam, qParam);
+    }
+    case Generators::TAUSWORTH: {
+      // TODO: Fix that.
+      return new Tausworth(seed, bitSize, pParam, qParam);
+    }
+    case Generators::MIX_MINIMUM: {
+      // Currently we use the same parameters for both generators.
+      return new MixMinium(
+        seed, seed,
+        modulo,
+        bitSize,
+        pParam, qParam,
+        pParam, qParam);
+    }
+  }
 };
 
 
 void help() {
   cout << "Usage: " << "-t <generator type> -p <p param> -q <q param> -b "
-                         "<range begin> -e <range end> -h help";
+                         "<range begin> -e <range end> "
+                         "-m <modulo> -s <bitSize> -h help";
 }
-
-enum Generators: int {
-  FIBONACCI = 0,
-  FIBONACCI_MOD,
-  TAUSWORTH
-};
-
 
 
 int main(int argc, char **argv) {
   int generatorType = -1;
   int64_t pParam = 1;
   int64_t qParam = 1;
-  int64_t range[2] = {0, 10000000};
-  size_t sequenceLength = 100;
+  size_t range[2] = {0, 100};
+  int64_t modulo = 16;
+  int64_t bitSize = 4;
   int c;
   vector<int64_t> seed;
 
   opterr = 0;
-  while ((c = getopt(argc, argv, "t:p:q:b:e:n:h")) != -1)
+  while ((c = getopt(argc, argv, "t:p:q:b:s:m:e:h")) != -1)
     switch (c) {
       case 't':
         generatorType = atoi(optarg);
@@ -227,10 +352,13 @@ int main(int argc, char **argv) {
       case 'e': // range end.
         range[1] = atoi(optarg);
         break;
-      case 'n': // range end.
-        sequenceLength = atoi(optarg);
+      case 'm': // modulo.
+        modulo = atoi(optarg);
         break;
-      case 'h': // range end.
+      case 's': // bitSize.
+        bitSize = atoi(optarg);
+        break;
+      case 'h': //help.
         help();
         return 0;
       case '?':
@@ -257,41 +385,29 @@ int main(int argc, char **argv) {
     swap(range[0], range[1]);
   }
 
-  PPGGenerator* generator;
-  double modifier = 0;
-  switch(generatorType) {
-    default:
-    case Generators::FIBONACCI:
-    {
-      int64_t modulo = range[1] - range[0];
-      modifier = range[0];
-      generator = new Fibonacci(seed, modulo, pParam, qParam);
-      break;
-    }
-    case Generators::FIBONACCI_MOD:
-    {
-      int64_t modulo = range[1] - range[0];
-      modifier = range[0];
-      generator = new FibonacciMod(seed, modulo, pParam, qParam);
-      break;
-    }
-    case Generators::TAUSWORTH:
-    {
-      // TODO: evaulate bitSize from range.
-      // TODO: Question to Janczewski how to deal here with range?
-      int64_t bitSize = range[1]; // For now.
-      generator = new Tausworth(seed, bitSize, pParam, qParam);
-      break;
-    }
+  PPGGenerator* generator =
+    createPPGGenerator(
+        generatorType,
+        seed,
+        pParam,
+        qParam,
+        modulo,
+        bitSize);
+
+  if (range[1] > MAX_SIZE) {
+    // TODO(bplotka) Mitigate that.
+    cerr << "Range " << range[1]
+         << " is more then we can allocate in array" << endl;
+    return 1;
   }
 
-  int64_t rands[MAX_SIZE];
+  int64_t rands[range[1]];
 
-  generator->randSequence(rands, sequenceLength);
+  generator->randSequence(rands, range[1]);
 
-  // print to stdout.
-  for (size_t i = 0 ; i < sequenceLength ; i++){
-    cout << (modifier + rands[i]) << " ";
+  // Print to stdout starting from range[0].
+  for (size_t i = range[0] ; i < range[1] ; i++){
+    cout << rands[i] << " ";
   }
 
   cout <<  endl ;
