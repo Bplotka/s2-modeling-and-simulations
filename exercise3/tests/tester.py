@@ -103,6 +103,6 @@ def scenarioRangesTau():
             statsFile.flush()
             statsFile.close()
 
-    test_ranges("tau", 1, "256 128 64 32 16", 5, 3, 0, 400000, 40000)
+    test_ranges("tau", 2, "256 128 64 32 16", 5, 3, 0, 400000, 40000)
 
 scenarioRangesTau()
