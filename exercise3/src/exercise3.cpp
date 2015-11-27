@@ -26,12 +26,6 @@ public:
  */
 class PPGGenerator {
  public:
-  explicit PPGGenerator(
-    const vector<uint64_t>& _seed, uint64_t _pParam, uint64_t _qParam)
-      : PPGGenerator(_pParam,_qParam) {
-    this->setSeed(_seed);
-  }
-
   explicit PPGGenerator(uint64_t _pParam, uint64_t _qParam)
       : pParam(_pParam), qParam(_qParam) {}
 
@@ -43,10 +37,6 @@ class PPGGenerator {
    */
   virtual void randSequence(uint64_t rands[], size_t sequenceLength) {
     throw NotImplementedException();
-  }
-
-  virtual void setSeed(const vector<uint64_t>& _seed) {
-    this->seed = _seed;
   }
 
  protected:
@@ -63,13 +53,15 @@ class Fibonacci : public PPGGenerator {
    * pParam = pParam > qParam and pParam =< initSize
    * qParam = qparam < pParam and qParam =< initSize
    */
-  Fibonacci(const vector<uint64_t>& _seed,
+  Fibonacci(const vector<uint64_t> _seed,
             uint64_t _modulo,
             uint64_t _pParam,
             uint64_t _qParam)
-          : modulo(_modulo), PPGGenerator(_seed, _pParam, _qParam) {}
+          : modulo(_modulo), PPGGenerator(_pParam, _qParam) {
+    this->setSeed(_seed);
+  }
 
-  virtual void setSeed(const vector<uint64_t>& _seed) {
+  virtual void setSeed(const vector<uint64_t> _seed) {
     if (this->pParam > _seed.size() or this->qParam > _seed.size())
       throw invalid_argument("seed size lower then p or q parameter");
     this->seed = _seed;
@@ -98,14 +90,15 @@ public:
    * pParam = pParam > qParam and pParam =< initSize
    * qParam = qparam < pParam and qParam =< initSize
    */
-  FibonacciMod(const vector<uint64_t>& _seed,
+  FibonacciMod(const vector<uint64_t> _seed,
             uint64_t _modulo,
             uint64_t _pParam,
             uint64_t _qParam,
             uint64_t _zeroReplacement = 1)
     : modulo(_modulo),
       zeroReplacement(_zeroReplacement),
-      PPGGenerator(_seed, _pParam, _qParam) {
+      PPGGenerator(_pParam, _qParam) {
+    this->setSeed(_seed);
     //cout << this->modulo << " " << this->pParam << " " << this->qParam <<
     // endl;
   }
@@ -148,18 +141,19 @@ public:
    * pParam = pParam > qParam and pParam =< initSize
    * qParam = qparam < pParam and qParam =< initSize
    */
-  Tausworth(const vector<uint64_t>& _seed,
+  Tausworth(const vector<uint64_t> _seed,
             uint64_t _bitSize,
             uint64_t _pParam,
             uint64_t _qParam)
-    : bitSize(_bitSize), PPGGenerator(_seed, _pParam, _qParam) {
+      : bitSize(_bitSize), PPGGenerator( _pParam, _qParam) {
+    this->setSeed(_seed);
     // cout << this->bitSize << " " << this->pParam << " " << this->qParam <<
       //endl;
   }
 
-  virtual void setSeed(const vector<uint64_t>& _seed) {
-    if (this->pParam > _seed.size() or this->qParam > _seed.size())
-      throw invalid_argument("seed size lower then p or q parameter");
+  virtual void setSeed(const vector<uint64_t> _seed) {
+    if (this->pParam > getBits(_seed[0]))
+      throw invalid_argument("seed[0] has not enough bits!");
     this->seed = _seed;
   }
 
@@ -207,8 +201,8 @@ public:
    * pParam = pParam > qParam and pParam =< initSize
    * qParam = qparam < pParam and qParam =< initSize
    */
-  MixMinium(const vector<uint64_t>& _seed1,
-            const vector<uint64_t>& _seed2,
+  MixMinium(const vector<uint64_t> _seed1,
+            const vector<uint64_t> _seed2,
             uint64_t _modulo,
             uint64_t _bitSize,
             uint64_t _pParam1,
@@ -217,11 +211,11 @@ public:
             uint64_t _qParam2)
     : fibonacciMod(FibonacciMod(_seed1, _modulo, _pParam1, _qParam1)),
       tausworth(Tausworth(_seed2, _bitSize, _pParam2, _qParam2)),
-      PPGGenerator({}, 0, 0) {}
+      PPGGenerator(0, 0), bitSize(_bitSize), seedSize(_seed1.size()) {}
 
-  void randSequence(uint64_t rands[], size_t sequenceLength) {
-    uint64_t tausworthRands[sequenceLength];
-    uint64_t fibonacciModRands[sequenceLength];
+  void randSequence(uint64_t rands[], uint64_t sequenceLength) {
+    uint64_t* fibonacciModRands = new uint64_t[sequenceLength + this->seedSize];
+    uint64_t* tausworthRands = new uint64_t[sequenceLength];
 
     tausworth.randSequence(tausworthRands, sequenceLength);
     fibonacciMod.randSequence(fibonacciModRands, sequenceLength);
@@ -229,11 +223,16 @@ public:
     for (size_t i = 0; i < sequenceLength; i++) {
       rands[i] = min(fibonacciModRands[i],  tausworthRands[i]);
     }
+
+    delete[] fibonacciModRands;
+    delete[] tausworthRands;
   }
 
  private:
   Tausworth tausworth;
   FibonacciMod fibonacciMod;
+  uint64_t bitSize;
+  uint64_t seedSize;
 };
 
 
