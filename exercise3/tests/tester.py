@@ -1,6 +1,11 @@
 #! /usr/bin/python
 
 from subprocess import call, check_output
+import scipy
+from scipy.stats import chisquare
+
+import time
+
 
 UTIL_EXE = "../../exercise1/build/gites"
 GENERATOR_EXE = "../build/generator"
@@ -19,6 +24,8 @@ def test(generatorName, generatorType, seed, p, q, rangeBegin, rangeEnd, iterati
     meanTestValue = 0
     varTestValue = 0
     periodTestValue = 0
+    chiValueA = 0
+    chiValueB = 0
     range = rangeEnd - rangeBegin
 
     print "--- started new test: " + generatorName
@@ -28,6 +35,11 @@ def test(generatorName, generatorType, seed, p, q, rangeBegin, rangeEnd, iterati
             cmd = GENERATOR_EXE + " -t " + str(generatorType) + " -p " + str(p) + " -q " + str(q) + " -m " + MODULO + \
                 " -s " + BIT_SIZE + " -b " + str(i) + " -e " + str(i+range) + " " + seed
             output = check_output(cmd, shell=True)
+
+            arr = map(int, output.split(' ')[:-1])
+            chiValue = chisquare(arr)
+            chiValueA = chiValue[0]
+            chiValueB = chiValue[1]
 
             outputFile.write(output)
             outputFile.flush()
@@ -46,12 +58,14 @@ def test(generatorName, generatorType, seed, p, q, rangeBegin, rangeEnd, iterati
     meanTestValue /= iterations
     varTestValue /= iterations
     periodTestValue /= iterations
+    chiValueA /= iterations
+    chiValueB /= iterations
 
     with open("all.stats", 'a+') as statsFile:
         summary = "> " + generatorName + " -p " + str(p) + " -q " + str(q) + " -m " + MODULO + " -s " + BIT_SIZE + " -b " + \
                   str(rangeBegin) + " -e " + str(rangeBegin + range) + " " + seed + \
                   " [" + str(iterations) + "] Mean: " + str(meanTestValue) + "; Var: " + str(varTestValue) + \
-                  "; Period: " + str(periodTestValue) + "\n"
+                  "; Period: " + str(periodTestValue) + "; ChiValue (" + str(chiValueA) + "," + str(chiValueB) + ") \n"
         statsFile.write(summary)
         statsFile.flush()
         statsFile.close()
@@ -86,7 +100,7 @@ def scenarioRangesFib():
     build()
 
     with open("all.stats", 'a+') as statsFile:
-            header = "---- New Scenario. Ranges! MODULO: " + MODULO + "; BIT_SIZE: " + BIT_SIZE + " ---- \n"
+            header = "---- New Scenario. " + time.strftime("%Y-%m-%d %H:%M") + " Ranges! MODULO: " + MODULO + "; BIT_SIZE: " + BIT_SIZE + " ---- \n"
             statsFile.write(header)
             statsFile.flush()
             statsFile.close()
@@ -98,11 +112,12 @@ def scenarioRangesTau():
     build()
 
     with open("all.stats", 'a+') as statsFile:
-            header = "---- New Scenario. Ranges! MODULO: " + MODULO + "; BIT_SIZE: " + BIT_SIZE + " ---- \n"
+            header = "---- New Scenario. " + time.strftime("%Y-%m-%d %H:%M") \
+                     + " Ranges! MODULO: " + MODULO + "; BIT_SIZE: " + BIT_SIZE + " ---- \n"
             statsFile.write(header)
             statsFile.flush()
             statsFile.close()
 
-    test_ranges("tau", 2, "256 128 64 32 16", 5, 3, 0, 400000, 40000)
+    test_ranges("tau", 2, "177", 5, 3, 0, 400000, 40000)
 
 scenarioRangesTau()

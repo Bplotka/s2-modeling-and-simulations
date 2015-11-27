@@ -165,8 +165,10 @@ public:
 
   void randSequence(uint64_t rands[], size_t sequenceLength) {
     uint64_t bitCount = getBits(this->seed[0]);
-    bitset<1000000> binarySeed(this->seed[0]);
-    for (int i = bitCount; i < sequenceLength * bitSize; i++) {
+
+    bitset<MAX_SIZE> binarySeed(this->seed[0]);
+
+    for (size_t i = bitCount; i < sequenceLength * bitSize; i++) {
       binarySeed[i] = (binarySeed[i-this->pParam] == binarySeed[i-this->qParam]) ? 0 : 1;
     }
     int bitPosition = 0;
