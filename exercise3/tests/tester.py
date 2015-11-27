@@ -71,12 +71,6 @@ def test(generatorName, generatorType, seed, p, q, rangeBegin, rangeEnd, iterati
         statsFile.close()
 
 
-def test_ranges(generatorName, generatorType, seed, p, q, rangeBegin, rangeEnd, packetSize):
-    for i in xrange(rangeBegin, rangeEnd, packetSize):
-        print str(i) + " - " + str(i + packetSize)
-        test(generatorName, generatorType, seed, p, q, i, i + packetSize, 1)
-
-
 def scenario1():
     build()
 
@@ -96,19 +90,8 @@ def scenario1():
     test("mix1", 3, "256 128 64 32 16", 5, 3, 256, 356, 10)
     test("mix2", 3, "256 128 64 32 16 8", 6, 3, 256, 356, 10)
 
-def scenarioRangesFib():
-    build()
 
-    with open("all.stats", 'a+') as statsFile:
-            header = "---- New Scenario. " + time.strftime("%Y-%m-%d %H:%M") + " Ranges! MODULO: " + MODULO + "; BIT_SIZE: " + BIT_SIZE + " ---- \n"
-            statsFile.write(header)
-            statsFile.flush()
-            statsFile.close()
-
-    test_ranges("fibonacci", 1, "256 128 64 32 16", 5, 3, 0, 400000, 40000)
-
-
-def scenarioRangesTau():
+def scenarioTau():
     build()
 
     with open("all.stats", 'a+') as statsFile:
@@ -118,6 +101,6 @@ def scenarioRangesTau():
             statsFile.flush()
             statsFile.close()
 
-    test_ranges("tau", 2, "177", 5, 3, 0, 400000, 40000)
+    test("tau", 2, "177", 5, 3, 0, 400000, 1)
 
-scenarioRangesTau()
+scenarioTau()
